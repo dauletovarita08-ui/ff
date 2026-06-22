@@ -1,0 +1,750 @@
+Here's the complete standalone HTML file — save it as freefire.html and open in any browser:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Fire — Survive. Dominate. Conquer.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #06080e; --fg: #e8eaf0; --card: #0d1120;
+      --secondary: #111827; --muted-bg: #0f1521; --muted-fg: #6b7a99;
+      --primary: #ff4500; --accent: #00e5ff; --gold: #ffd600;
+      --border: rgba(0,229,255,0.1); --radius: 2px;
+      --ff-d: 'Rajdhani', sans-serif;
+      --ff-b: 'Inter', sans-serif;
+      --ff-m: 'JetBrains Mono', monospace;
+    }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--ff-b); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+    button { font-family: var(--ff-b); cursor: pointer; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(6,8,14,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: var(--ff-d); font-size: 1.5rem; font-weight: 700; letter-spacing: .15em; }
+    .nav-logo span { color: var(--accent); }
+    .nav-logo em { color: var(--primary); font-style: normal; }
+    .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-links a { font-family: var(--ff-d); font-size: .9rem; font-weight: 600; letter-spacing: .1em; color: var(--muted-fg); transition: color .2s; }
+    .nav-links a:hover { color: var(--fg); }
+    .nav-btn { padding: .45rem 1.25rem; background: var(--primary); color: #fff; font-family: var(--ff-d); font-size: .9rem; font-weight: 700; letter-spacing: .1em; border: none; border-radius: var(--radius); transition: opacity .2s; }
+    .nav-btn:hover { opacity: .85; }
+    .hamburger { display: none; background: none; border: none; color: var(--fg); font-size: 1.5rem; padding: 0; }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu { display: none; position: fixed; inset: 0; z-index: 40; background: rgba(6,8,14,.97); flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+    .mobile-menu.open { display: flex; }
+    .mobile-close { position: absolute; top: 1.25rem; right: 1.5rem; background: none; border: none; color: var(--fg); font-size: 1.75rem; }
+    .mobile-menu a { font-family: var(--ff-d); font-size: 2rem; font-weight: 700; letter-spacing: .15em; color: var(--fg); }
+    .mobile-play { padding: .75rem 2.5rem; background: var(--primary); color: #fff; font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700; letter-spacing: .1em; border: none; border-radius: var(--radius); }
+
+    /* ── MODAL ── */
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(6,8,14,.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem; }
+    .modal-backdrop.open { display: flex; }
+    .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); max-width: 480px; width: 100%; position: relative; padding: 2rem; }
+    .modal-close { position: absolute; top: .75rem; right: 1rem; background: none; border: none; color: var(--muted-fg); font-size: 1.1rem; font-family: var(--ff-m); transition: color .2s; }
+    .modal-close:hover { color: var(--fg); }
+    .modal-title { font-family: var(--ff-d); font-size: 1.5rem; font-weight: 700; letter-spacing: .1em; margin-bottom: .25rem; }
+    .modal-sub { color: var(--muted-fg); font-size: .875rem; margin-bottom: 1.5rem; }
+    .field-label { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted-fg); display: block; margin-bottom: .375rem; }
+    .field-input { width: 100%; padding: .625rem .875rem; background: var(--secondary); border: 1px solid var(--border); color: var(--fg); font-size: .875rem; border-radius: var(--radius); outline: none; font-family: var(--ff-b); margin-bottom: .875rem; transition: border-color .2s; }
+    .field-input:focus { border-color: var(--primary); }
+    .submit-btn { width: 100%; padding: .8rem; background: var(--primary); color: #fff; font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700; letter-spacing: .1em; border: none; border-radius: var(--radius); transition: opacity .2s; margin-top: .25rem; }
+    .submit-btn:hover { opacity: .85; }
+    .dl-option { display: flex; align-items: center; gap: 1rem; padding: .875rem 1rem; background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: .75rem; transition: border-color .2s; }
+    .dl-option:hover { border-color: var(--accent); }
+    .dl-icon { font-size: 1.75rem; }
+    .dl-name { font-weight: 600; font-size: .9rem; }
+    .dl-size { font-family: var(--ff-m); font-size: .7rem; color: var(--muted-fg); margin-top: .15rem; }
+    .dl-arrow { margin-left: auto; font-family: var(--ff-m); font-size: .75rem; color: var(--accent); }
+
+    /* ── TOAST ── */
+    .toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 200; padding: .75rem 1.5rem; background: var(--primary); color: #fff; font-family: var(--ff-d); font-size: 1rem; font-weight: 600; letter-spacing: .05em; border-radius: var(--radius); white-space: nowrap; box-shadow: 0 0 24px rgba(255,69,0,.5); }
+    .toast.show { display: block; }
+
+    /* ── SECTION ── */
+    .section { padding: 6rem 2.5rem; border-top: 1px solid var(--border); }
+    .inner { max-width: 72rem; margin: 0 auto; }
+    .sec-label { font-family: var(--ff-m); font-size: .7rem; letter-spacing: .2em; color: var(--accent); margin-bottom: .75rem; }
+    .sec-h2 { font-family: var(--ff-d); font-size: clamp(2rem,5vw,3rem); font-weight: 700; letter-spacing: .05em; }
+
+    /* ── HERO ── */
+    .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; padding-top: 4.5rem; }
+    .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .18; }
+    .hero-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(255,69,0,.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 30%, rgba(0,229,255,.08) 0%, transparent 60%), linear-gradient(to right, rgba(6,8,14,.95) 0%, rgba(6,8,14,.6) 60%, rgba(6,8,14,.2) 100%); }
+    .hero-content { position: relative; z-index: 1; max-width: 42rem; }
+    .hero-eyebrow { font-family: var(--ff-m); font-size: .72rem; letter-spacing: .25em; color: var(--accent); margin-bottom: 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .hero-line { display: inline-block; width: 2rem; height: 1px; background: var(--accent); }
+    .hero-h1 { font-family: var(--ff-d); font-size: clamp(3.5rem,10vw,7rem); font-weight: 700; line-height: .95; letter-spacing: -.01em; margin-bottom: 1.5rem; }
+    .hero-h1 .c1 { display: block; color: var(--fg); }
+    .hero-h1 .c2 { display: block; color: var(--primary); }
+    .hero-h1 .c3 { display: block; color: var(--accent); }
+    .hero-p { color: var(--muted-fg); font-size: 1.05rem; line-height: 1.7; max-width: 28rem; margin-bottom: 2.5rem; }
+    .hero-p strong { color: var(--fg); }
+    .hero-btns { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
+    .btn-fire { padding: 1rem 2.25rem; background: var(--primary); color: #fff; font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700; letter-spacing: .1em; border: 2px solid var(--primary); border-radius: var(--radius); box-shadow: 0 0 24px rgba(255,69,0,.4); transition: box-shadow .2s; }
+    .btn-fire:hover { box-shadow: 0 0 48px rgba(255,69,0,.7); }
+    .btn-ghost { padding: 1rem 2.25rem; background: transparent; color: var(--fg); font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700; letter-spacing: .1em; border: 2px solid rgba(255,255,255,.2); border-radius: var(--radius); transition: border-color .2s; }
+    .btn-ghost:hover { border-color: var(--accent); }
+    .hero-stats { display: flex; gap: 2.5rem; flex-wrap: wrap; }
+    .hstat-n { font-family: var(--ff-d); font-size: 1.75rem; font-weight: 700; color: var(--accent); }
+    .hstat-l { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; color: var(--muted-fg); }
+    .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+    .scroll-hint span { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .2em; color: var(--muted-fg); }
+    .scroll-line { width: 1px; height: 2rem; background: linear-gradient(to bottom, var(--muted-fg), transparent); }
+
+    /* ── CHARS ── */
+    .tab-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+    .tab-btn { padding: .6rem 1.25rem; font-family: var(--ff-d); font-size: .95rem; font-weight: 700; letter-spacing: .1em; border: 2px solid var(--border); background: transparent; color: var(--muted-fg); border-radius: var(--radius); transition: all .2s; }
+    .char-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 1px; background: var(--border); }
+    .char-img-panel { background: var(--card); position: relative; overflow: hidden; min-height: 400px; }
+    .char-img-panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .7; }
+    .char-img-overlay { position: absolute; inset: 0; }
+    .char-img-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem; }
+    .char-rarity { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .2em; margin-bottom: .5rem; }
+    .char-name { font-family: var(--ff-d); font-size: 2.25rem; font-weight: 700; line-height: 1; }
+    .char-detail { background: var(--card); padding: 2.5rem; }
+    .char-ability-label { font-family: var(--ff-m); font-size: .72rem; letter-spacing: .15em; margin-bottom: .5rem; }
+    .char-desc { color: var(--muted-fg); line-height: 1.7; margin-bottom: 2rem; font-size: .9rem; }
+    .stats-label { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .2em; color: var(--muted-fg); margin-bottom: 1rem; }
+    .stat-row { margin-bottom: .75rem; }
+    .stat-row-header { display: flex; justify-content: space-between; margin-bottom: .25rem; }
+    .stat-name { font-family: var(--ff-m); font-size: .68rem; letter-spacing: .1em; color: var(--muted-fg); text-transform: uppercase; }
+    .stat-val { font-family: var(--ff-m); font-size: .68rem; }
+    .stat-track { height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; }
+    .stat-fill { height: 100%; border-radius: 2px; transition: width .6s ease; }
+    .select-btn { width: 100%; padding: .875rem; font-family: var(--ff-d); font-size: 1rem; font-weight: 700; letter-spacing: .1em; border: none; border-radius: var(--radius); margin-top: .5rem; transition: opacity .2s; }
+    .select-btn:hover { opacity: .85; }
+
+    /* ── WEAPONS ── */
+    .weapons-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); }
+    .weapon-card { background: var(--card); padding: 1.75rem; transition: background .2s; border-top: 2px solid transparent; }
+    .weapon-card:hover { background: var(--secondary); }
+    .weapon-type { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .15em; color: var(--muted-fg); margin-bottom: .375rem; }
+    .weapon-name { font-family: var(--ff-d); font-size: 1.35rem; font-weight: 700; letter-spacing: .05em; }
+    .weapon-tag { font-family: var(--ff-m); font-size: .65rem; padding: .2rem .5rem; border-radius: var(--radius); }
+    .weapon-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+    .weapon-bars { display: flex; flex-direction: column; gap: .625rem; }
+    .wbar-header { display: flex; justify-content: space-between; margin-bottom: .2rem; }
+    .wbar-label { font-family: var(--ff-m); font-size: .6rem; letter-spacing: .1em; color: var(--muted-fg); }
+    .wbar-val { font-family: var(--ff-m); font-size: .6rem; }
+    .wbar-track { height: 2px; background: rgba(255,255,255,.06); }
+    .wbar-fill { height: 100%; transition: width .4s; }
+    .weapon-footer { display: flex; justify-content: space-between; margin-top: 1rem; }
+    .weapon-mag { font-family: var(--ff-m); font-size: .65rem; color: var(--muted-fg); }
+    .weapon-equip { font-family: var(--ff-m); font-size: .65rem; }
+
+    /* ── MODES ── */
+    .modes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border); }
+    .mode-panel { background: var(--card); padding: 2.5rem; }
+    .mode-meta { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .2em; margin-bottom: 1.5rem; display: flex; gap: 2rem; }
+    .mode-h3 { font-family: var(--ff-d); font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; }
+    .mode-desc { color: var(--muted-fg); line-height: 1.7; margin-bottom: 2rem; font-size: .9rem; }
+    .mode-map-label { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .15em; color: var(--muted-fg); margin-bottom: .5rem; }
+    .mode-map { padding: .625rem 1rem; background: var(--secondary); border-radius: var(--radius); font-family: var(--ff-m); font-size: .8rem; margin-bottom: 1.75rem; }
+    .mode-play-btn { width: 100%; padding: .875rem; font-family: var(--ff-d); font-size: 1rem; font-weight: 700; letter-spacing: .1em; border: none; border-radius: var(--radius); transition: opacity .2s; color: #fff; }
+    .mode-play-btn:hover { opacity: .85; }
+    .tips-label { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .2em; color: var(--muted-fg); margin-bottom: 1.5rem; }
+    .tip-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem; background: var(--secondary); border-radius: var(--radius); border-left: 3px solid; margin-bottom: 1rem; }
+    .tip-num { font-family: var(--ff-m); font-size: .75rem; flex-shrink: 0; margin-top: .1rem; }
+    .tip-text { color: var(--muted-fg); font-size: .875rem; line-height: 1.6; }
+
+    /* ── LEADERBOARD ── */
+    .lb-header-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2.5rem; }
+    .lb-filters { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .lb-filter { padding: .4rem .875rem; font-family: var(--ff-m); font-size: .72rem; letter-spacing: .1em; border: 1px solid var(--border); background: transparent; color: var(--muted-fg); border-radius: var(--radius); transition: all .2s; }
+    .lb-filter.active, .lb-filter:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,.1); }
+    .lb-table { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .lb-col-header { display: grid; grid-template-columns: 3rem 1fr 5rem 6rem 6rem 5rem 7rem; padding: .625rem 1.5rem; background: var(--secondary); font-family: var(--ff-m); font-size: .65rem; letter-spacing: .15em; color: var(--muted-fg); gap: 1px; }
+    .lb-row { display: grid; grid-template-columns: 3rem 1fr 5rem 6rem 6rem 5rem 7rem; padding: .875rem 1.5rem; border-top: 1px solid var(--border); align-items: center; gap: 1px; transition: background .2s; }
+    .lb-row:hover { background: var(--secondary); }
+    .lb-rank { font-family: var(--ff-m); font-size: .85rem; font-weight: 700; }
+    .lb-name { font-family: var(--ff-d); font-size: 1rem; font-weight: 700; letter-spacing: .05em; }
+    .lb-region { font-family: var(--ff-m); font-size: .7rem; color: var(--muted-fg); }
+    .lb-num { font-family: var(--ff-m); font-size: .8rem; }
+    .lb-kd { font-family: var(--ff-m); font-size: .8rem; color: var(--accent); }
+    .lb-badge { font-family: var(--ff-m); font-size: .65rem; padding: .15rem .5rem; border-radius: var(--radius); display: inline-block; }
+    .badge-heroic { background: rgba(255,69,0,.2); color: var(--primary); }
+    .badge-diamond { background: rgba(0,229,255,.15); color: var(--accent); }
+    .badge-plat { background: rgba(255,255,255,.08); color: var(--muted-fg); }
+    .lb-more { margin-top: 1.5rem; text-align: center; }
+    .lb-more-btn { padding: .625rem 2rem; background: transparent; color: var(--muted-fg); font-family: var(--ff-m); font-size: .75rem; letter-spacing: .1em; border: 1px solid var(--border); border-radius: var(--radius); transition: all .2s; }
+    .lb-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── NEWS ── */
+    .news-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); }
+    .news-card { background: var(--card); cursor: pointer; transition: background .2s; }
+    .news-card:hover { background: var(--secondary); }
+    .news-img { height: 12rem; overflow: hidden; background: var(--secondary); }
+    .news-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+    .news-card:hover .news-img img { transform: scale(1.05); }
+    .news-body { padding: 1.5rem; }
+    .news-meta { display: flex; gap: .75rem; align-items: center; margin-bottom: .75rem; }
+    .news-tag { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .12em; padding: .2rem .5rem; background: var(--primary); color: #fff; border-radius: var(--radius); }
+    .news-date { font-family: var(--ff-m); font-size: .65rem; color: var(--muted-fg); }
+    .news-title { font-family: var(--ff-d); font-size: 1.05rem; font-weight: 700; line-height: 1.4; }
+    .news-link { margin-top: 1rem; font-family: var(--ff-m); font-size: .7rem; letter-spacing: .1em; color: var(--accent); }
+
+    /* ── CTA ── */
+    .cta-section { padding: 6rem 2.5rem; border-top: 1px solid var(--border); background: linear-gradient(135deg, rgba(255,69,0,.06) 0%, rgba(0,229,255,.04) 100%); position: relative; overflow: hidden; text-align: center; }
+    .cta-glow { position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(255,69,0,.08) 0%, transparent 70%); }
+    .cta-inner { position: relative; z-index: 1; max-width: 40rem; margin: 0 auto; }
+    .cta-h2 { font-family: var(--ff-d); font-size: clamp(2.5rem,7vw,5rem); font-weight: 700; line-height: 1; letter-spacing: .02em; margin-bottom: 1.5rem; }
+    .cta-h2 span { color: var(--primary); }
+    .cta-p { color: var(--muted-fg); font-size: 1.05rem; margin-bottom: 2.5rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+    .btn-cyan { padding: 1rem 2.5rem; background: transparent; color: var(--accent); font-family: var(--ff-d); font-size: 1.15rem; font-weight: 700; letter-spacing: .1em; border: 2px solid var(--accent); border-radius: var(--radius); transition: background .2s; }
+    .btn-cyan:hover { background: rgba(0,229,255,.1); }
+    .cta-platforms { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .cta-plat { display: flex; flex-direction: column; align-items: center; gap: .25rem; background: none; border: none; cursor: pointer; color: var(--muted-fg); transition: color .2s; }
+    .cta-plat:hover { color: var(--fg); }
+    .cta-plat-icon { font-size: 1.75rem; }
+    .cta-plat-name { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .1em; }
+    .cta-plat-store { font-family: var(--ff-m); font-size: .6rem; opacity: .5; }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border); padding: 3rem 2.5rem; }
+    .footer-inner { max-width: 72rem; margin: 0 auto; }
+    .footer-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem; margin-bottom: 2.5rem; }
+    .footer-logo { font-family: var(--ff-d); font-size: 1.5rem; font-weight: 700; letter-spacing: .15em; margin-bottom: .5rem; }
+    .footer-logo em { color: var(--primary); font-style: normal; }
+    .footer-logo span { color: var(--accent); }
+    .footer-copy { font-family: var(--ff-m); font-size: .7rem; color: var(--muted-fg); }
+    .footer-cols { display: flex; gap: 3rem; flex-wrap: wrap; }
+    .footer-col-title { font-family: var(--ff-m); font-size: .65rem; letter-spacing: .2em; color: var(--muted-fg); margin-bottom: 1rem; }
+    .footer-col { display: flex; flex-direction: column; gap: .5rem; }
+    .footer-link { font-family: var(--ff-d); font-size: .95rem; font-weight: 600; letter-spacing: .05em; color: var(--muted-fg); background: none; border: none; text-align: left; padding: 0; transition: color .2s; }
+    .footer-link:hover { color: var(--fg); }
+    .footer-divider { height: 1px; background: var(--border); margin-bottom: 1.5rem; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-socials { display: flex; gap: 1.5rem; }
+    .footer-social { font-family: var(--ff-m); font-size: .7rem; letter-spacing: .1em; color: var(--muted-fg); background: none; border: none; transition: color .2s; }
+    .footer-social:hover { color: var(--accent); }
+    .footer-author { font-family: var(--ff-m); font-size: .75rem; color: var(--muted-fg); }
+    .footer-author strong { color: var(--accent); font-weight: 700; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .char-grid, .modes-grid { grid-template-columns: 1fr; }
+      .weapons-grid, .news-grid { grid-template-columns: 1fr 1fr; }
+      .lb-col-header, .lb-row { grid-template-columns: 3rem 1fr 4rem 5rem 4rem; }
+      .lb-col-kd, .lb-col-badge, .lb-kd, .lb-badge { display: none; }
+    }
+    @media (max-width: 600px) {
+      .section { padding: 4rem 1.25rem; }
+      nav { padding: 1rem 1.25rem; }
+      .hero-content { padding: 0; }
+      .weapons-grid, .news-grid { grid-template-columns: 1fr; }
+      footer { padding: 2rem 1.25rem; }
+      .footer-top { flex-direction: column; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+      .lb-col-header, .lb-row { grid-template-columns: 2.5rem 1fr 4rem 4.5rem; }
+      .lb-col-region, .lb-region, .lb-col-wins, .lb-wins { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
+  <a href="#characters" onclick="closeMobileMenu()">CHARACTERS</a>
+  <a href="#weapons" onclick="closeMobileMenu()">WEAPONS</a>
+  <a href="#modes" onclick="closeMobileMenu()">MODES</a>
+  <a href="#leaderboard" onclick="closeMobileMenu()">LEADERBOARD</a>
+  <a href="#news" onclick="closeMobileMenu()">NEWS</a>
+  <button class="mobile-play" onclick="closeMobileMenu(); openModal('registerModal')">PLAY FREE</button>
+</div>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="trailerModal" onclick="closeModalOnBg(event,'trailerModal')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('trailerModal')">✕</button>
+    <div style="color:var(--accent);font-family:var(--ff-d);font-size:1.25rem;font-weight:700;letter-spacing:.1em;margin-bottom:1rem">▶ OFFICIAL TRAILER</div>
+    <div style="background:#000;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);margin-bottom:1rem;border:1px solid var(--border)">
+      <div style="text-align:center">
+        <div style="font-size:3rem;margin-bottom:.5rem">🎬</div>
+        <div style="color:var(--muted-fg);font-size:.875rem">Trailer player embedded here</div>
+        <div style="font-family:var(--ff-m);font-size:.75rem;color:var(--primary);margin-top:.5rem">FREE FIRE — SURVIVE TO WIN</div>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="closeModal('trailerModal')">CLOSE</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="registerModal" onclick="closeModalOnBg(event,'registerModal')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    <div class="modal-title">CREATE ACCOUNT</div>
+    <div class="modal-sub">Join 1 billion+ Free Fire players worldwide</div>
+    <form onsubmit="handleRegister(event)">
+      <label class="field-label">Username</label>
+      <input class="field-input" id="reg-name" type="text" placeholder="Your in-game name" />
+      <label class="field-label">Email</label>
+      <input class="field-input" id="reg-email" type="email" placeholder="your@email.com" />
+      <label class="field-label">Server Region</label>
+      <select class="field-input" id="reg-server" style="appearance:none">
+        <option>SEA</option><option>IND</option><option>EU</option>
+        <option>NA</option><option>SA</option><option>CIS</option><option>ME</option>
+      </select>
+      <button type="submit" class="submit-btn">PLAY FOR FREE</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="downloadModal" onclick="closeModalOnBg(event,'downloadModal')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('downloadModal')">✕</button>
+    <div class="modal-title">DOWNLOAD FREE FIRE</div>
+    <div class="modal-sub">Available on all platforms — 100% Free</div>
+    <div class="dl-option" onclick="doDownload('Android (Google Play)')">
+      <div class="dl-icon">🤖</div>
+      <div><div class="dl-name">Android (Google Play)</div><div class="dl-size">720 MB</div></div>
+      <div class="dl-arrow">↓</div>
+    </div>
+    <div class="dl-option" onclick="doDownload('iOS (App Store)')">
+      <div class="dl-icon">🍎</div>
+      <div><div class="dl-name">iOS (App Store)</div><div class="dl-size">1.2 GB</div></div>
+      <div class="dl-arrow">↓</div>
+    </div>
+    <div class="dl-option" onclick="doDownload('PC Emulator')">
+      <div class="dl-icon">💻</div>
+      <div><div class="dl-name">PC (Emulator)</div><div class="dl-size">2.4 GB</div></div>
+      <div class="dl-arrow">↓</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><em>FREE</em><span>FIRE</span></div>
+  <ul class="nav-links">
+    <li><a href="#characters">CHARACTERS</a></li>
+    <li><a href="#weapons">WEAPONS</a></li>
+    <li><a href="#modes">MODES</a></li>
+    <li><a href="#leaderboard">LEADERBOARD</a></li>
+    <li><a href="#news">NEWS</a></li>
+  </ul>
+  <div style="display:flex;gap:.75rem;align-items:center">
+    <button class="nav-btn" onclick="openModal('registerModal')">PLAY FREE</button>
+    <button class="hamburger" onclick="openMobileMenu()">☰</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="hero-img" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1600&h=900&fit=crop&auto=format" alt="Gaming atmosphere" />
+  <div class="hero-overlay"></div>
+  <div class="inner" style="position:relative;z-index:1;width:100%">
+    <div class="hero-content">
+      <div class="hero-eyebrow"><span class="hero-line"></span>SEASON 29 · RANKED OPEN</div>
+      <h1 class="hero-h1">
+        <span class="c1">SURVIVE.</span>
+        <span class="c2">DOMINATE.</span>
+        <span class="c3">CONQUER.</span>
+      </h1>
+      <p class="hero-p">50 players. One island. No second chances. The world's most downloaded battle royale — join over <strong>1 billion players</strong> in the ultimate fight for survival.</p>
+      <div class="hero-btns">
+        <button class="btn-fire" onclick="openModal('registerModal')">▶ PLAY FOR FREE</button>
+        <button class="btn-ghost" onclick="openModal('trailerModal')">◉ WATCH TRAILER</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="hstat-n">1B+</div><div class="hstat-l">Players</div></div>
+        <div><div class="hstat-n">50</div><div class="hstat-l">Per Match</div></div>
+        <div><div class="hstat-n">#1</div><div class="hstat-l">Mobile BR</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>SCROLL</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- CHARACTERS -->
+<section id="characters" class="section">
+  <div class="inner">
+    <div class="sec-label">// SELECT OPERATOR</div>
+    <h2 class="sec-h2" style="margin-bottom:2rem">CHARACTERS</h2>
+    <div class="tab-row" id="charTabs"></div>
+    <div class="char-grid" id="charPanel"></div>
+  </div>
+</section>
+
+<!-- WEAPONS -->
+<section id="weapons" class="section">
+  <div class="inner">
+    <div class="sec-label">// ARMORY</div>
+    <h2 class="sec-h2" style="margin-bottom:2rem">WEAPONS</h2>
+    <div class="weapons-grid" id="weaponsGrid"></div>
+  </div>
+</section>
+
+<!-- MODES -->
+<section id="modes" class="section">
+  <div class="inner">
+    <div class="sec-label">// GAME MODES</div>
+    <h2 class="sec-h2" style="margin-bottom:2rem">CHOOSE YOUR BATTLE</h2>
+    <div class="tab-row" id="modeTabs"></div>
+    <div class="modes-grid" id="modePanel"></div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaderboard" class="section">
+  <div class="inner">
+    <div class="lb-header-row">
+      <div>
+        <div class="sec-label">// SEASON 29</div>
+        <h2 class="sec-h2">LEADERBOARD</h2>
+      </div>
+      <div class="lb-filters" id="lbFilters"></div>
+    </div>
+    <div class="lb-table">
+      <div class="lb-col-header">
+        <span>#</span><span>PLAYER</span><span class="lb-col-region">REGION</span><span>KILLS</span><span class="lb-col-wins">WINS</span><span class="lb-col-kd">K/D</span><span class="lb-col-badge">BADGE</span>
+      </div>
+      <div id="lbRows"></div>
+    </div>
+    <div class="lb-more"><button class="lb-more-btn" onclick="showToast('Loading full leaderboard…')">VIEW ALL RANKINGS →</button></div>
+  </div>
+</section>
+
+<!-- NEWS -->
+<section id="news" class="section">
+  <div class="inner">
+    <div class="sec-label">// LATEST</div>
+    <h2 class="sec-h2" style="margin-bottom:2rem">NEWS & UPDATES</h2>
+    <div class="news-grid" id="newsGrid"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <div class="sec-label" style="text-align:center;margin-bottom:1rem">// FREE TO PLAY · FOREVER</div>
+    <h2 class="cta-h2">ARE YOU READY<br><span>TO SURVIVE?</span></h2>
+    <p class="cta-p">Download Free Fire now and join over 1 billion players worldwide. No cost. No excuses. Just survival.</p>
+    <div class="cta-btns">
+      <button class="btn-fire" style="font-size:1.15rem" onclick="openModal('downloadModal')">↓ DOWNLOAD NOW</button>
+      <button class="btn-cyan" onclick="openModal('registerModal')">PLAY IN BROWSER</button>
+    </div>
+    <div class="cta-platforms">
+      <button class="cta-plat" onclick="doDownload('Android')"><span class="cta-plat-icon">🤖</span><span class="cta-plat-name">ANDROID</span><span class="cta-plat-store">Google Play</span></button>
+      <button class="cta-plat" onclick="doDownload('iOS')"><span class="cta-plat-icon">🍎</span><span class="cta-plat-name">IOS</span><span class="cta-plat-store">App Store</span></button>
+      <button class="cta-plat" onclick="doDownload('PC')"><span class="cta-plat-icon">💻</span><span class="cta-plat-name">PC</span><span class="cta-plat-store">Emulator</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo"><em>FREE</em><span>FIRE</span></div>
+        <div class="footer-copy">© 2024 Garena International. All rights reserved.</div>
+      </div>
+      <div class="footer-cols">
+        <div>
+          <div class="footer-col-title">GAME</div>
+          <div class="footer-col">
+            <button class="footer-link" onclick="showToast('Opening Characters…')">Characters</button>
+            <button class="footer-link" onclick="showToast('Opening Weapons…')">Weapons</button>
+            <button class="footer-link" onclick="showToast('Opening Game Modes…')">Game Modes</button>
+            <button class="footer-link" onclick="showToast('Opening Ranked…')">Ranked</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">SUPPORT</div>
+          <div class="footer-col">
+            <button class="footer-link" onclick="showToast('Opening FAQ…')">FAQ</button>
+            <button class="footer-link" onclick="showToast('Opening Contact…')">Contact</button>
+            <button class="footer-link" onclick="showToast('Opening Bug Report…')">Report Bug</button>
+            <button class="footer-link" onclick="showToast('Checking status…')">Status</button>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">LEGAL</div>
+          <div class="footer-col">
+            <button class="footer-link" onclick="showToast('Opening Privacy Policy…')">Privacy Policy</button>
+            <button class="footer-link" onclick="showToast('Opening Terms…')">Terms of Use</button>
+            <button class="footer-link" onclick="showToast('Opening Cookie Policy…')">Cookie Policy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <div class="footer-socials">
+        <button class="footer-social" onclick="showToast('Opening Twitter/X…')">Twitter/X</button>
+        <button class="footer-social" onclick="showToast('Opening YouTube…')">YouTube</button>
+        <button class="footer-social" onclick="showToast('Opening Discord…')">Discord</button>
+        <button class="footer-social" onclick="showToast('Opening Instagram…')" href="https://www.instagram.com/_its_az1z_/" target="_blank">Instagram</button>
+      </div>
+      <div class="footer-author">Designed &amp; developed by <strong>Aziz Fazliddinov Avazovich</strong></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── DATA ── */
+const CHARS = [
+  { id:"alok", name:"DJ Alok", role:"Support", rarity:"Legendary", ability:"Drop the Beat", desc:"Creates an aura that restores HP by 5 per second and boosts movement speed by 10% for 5 seconds. One of the most sought-after characters in Free Fire.", stats:{HP:88,Speed:92,Armor:70,Ability:95}, color:"#00e5ff", img:"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=700&fit=crop&auto=format" },
+  { id:"chrono", name:"Chrono", role:"Defense", rarity:"Legendary", ability:"Time Turner", desc:"Creates a force field blocking 600 damage. Movement speed inside increases by 15%. Allies entering also gain the speed boost — a game-changing defensive wall.", stats:{HP:75,Speed:80,Armor:98,Ability:90}, color:"#ff4500", img:"https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&h=700&fit=crop&auto=format" },
+  { id:"kelly", name:"Kelly", role:"Assault", rarity:"Rare", ability:"Dash", desc:"Increases sprinting speed by 6% at max level — the fastest character in the game. Awakened form deals bonus damage on first shot after sprinting.", stats:{HP:70,Speed:99,Armor:60,Ability:72}, color:"#ffd600", img:"https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=600&h=700&fit=crop&auto=format" },
+  { id:"hayato", name:"Hayato", role:"Damage", rarity:"Epic", ability:"Bushido", desc:"For every 10% decrease in max HP, armor penetration increases by 8%. High risk, high reward — rewards aggressive low-health gameplay.", stats:{HP:60,Speed:78,Armor:65,Ability:88}, color:"#ff1744", img:"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=700&fit=crop&auto=format" },
+];
+
+const WEAPONS = [
+  { name:"GROZA", type:"Assault Rifle", damage:62, range:78, firerate:85, mag:30, tag:"META", color:"#ff4500" },
+  { name:"M1887", type:"Shotgun", damage:99, range:30, firerate:45, mag:2, tag:"LETHAL", color:"#ff1744" },
+  { name:"AWM", type:"Sniper Rifle", damage:100, range:99, firerate:25, mag:5, tag:"AIRDROP", color:"#00e5ff" },
+  { name:"MP40", type:"SMG", damage:48, range:55, firerate:97, mag:20, tag:"RUSH", color:"#ffd600" },
+  { name:"M60", type:"LMG", damage:56, range:72, firerate:70, mag:60, tag:"SUPPRESS", color:"#69f0ae" },
+  { name:"Desert Eagle", type:"Pistol", damage:63, range:65, firerate:50, mag:7, tag:"BACKUP", color:"#e040fb" },
+];
+
+const MODES = [
+  { id:"classic", name:"Classic Battle Royale", players:"50 Players", duration:"~25 min", map:"Bermuda / Kalahari / Purgatory", desc:"The original survival experience. 50 players parachute onto the island — only one walks out. Loot, fight, survive the shrinking zone.", tips:["Land away from hot zones early game","Always prioritize helmets and vests","The final circle rewards positioning over aim"], color:"#ff4500" },
+  { id:"clash", name:"Clash Squad", players:"4v4", duration:"~10 min", map:"CS-Ranked Maps", desc:"Round-based 4v4 tactical combat. Buy weapons between rounds with gold earned from kills. First team to 4 round wins claims the match.", tips:["Coordinate buys with teammates","Save rounds are valid strategy","Utility usage wins more rounds than aim"], color:"#00e5ff" },
+  { id:"lone", name:"Lone Wolf", players:"1v1", duration:"~5 min", map:"Isolated Arena", desc:"Pure 1v1 duels in an isolated arena. Best of 3 rounds. Prove your individual skill without team support — a true test of mechanical ability.", tips:["Mind games matter in 1v1","Learn your opponent's patterns","Health management is critical — no revives"], color:"#ffd600" },
+];
+
+const LEADERBOARD = [
+  { rank:1, name:"XxBloodKingxX", region:"SEA", kills:4892, wins:312, kd:"8.74", badge:"Heroic" },
+  { rank:2, name:"ShadowReaper99", region:"IND", kills:4511, wins:289, kd:"7.96", badge:"Heroic" },
+  { rank:3, name:"FireStorm_RU", region:"EU", kills:4204, wins:271, kd:"7.22", badge:"Heroic" },
+  { rank:4, name:"AzizKiller_UZ", region:"CIS", kills:3987, wins:254, kd:"6.88", badge:"Diamond" },
+  { rank:5, name:"NightCrawler_BR", region:"SA", kills:3762, wins:238, kd:"6.51", badge:"Diamond" },
+  { rank:6, name:"GhostByte_SG", region:"SEA", kills:3540, wins:220, kd:"6.14", badge:"Diamond" },
+  { rank:7, name:"UrFavEnemy", region:"NA", kills:3301, wins:208, kd:"5.87", badge:"Platinum" },
+  { rank:8, name:"Predator_KZ", region:"CIS", kills:3088, wins:195, kd:"5.53", badge:"Platinum" },
+];
+
+const NEWS = [
+  { tag:"UPDATE", date:"Jun 20, 2024", title:"OB45 Patch Notes — New Character, Weapon Balancing & Ranked Season Reset", img:"https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&h=350&fit=crop&auto=format" },
+  { tag:"EVENT", date:"Jun 18, 2024", title:"Summer Blaze Event: Exclusive Skins, Free Diamonds & Limited-Time Missions", img:"https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&h=350&fit=crop&auto=format" },
+  { tag:"ESPORTS", date:"Jun 15, 2024", title:"Free Fire World Series 2024 — $2M Prize Pool, 24 Teams, 6 Regions", img:"https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=600&h=350&fit=crop&auto=format" },
+];
+
+/* ── STATE ── */
+let activeChar = 0;
+let activeMode = 0;
+let activeRegion = "ALL";
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+/* ── MODALS ── */
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function closeModalOnBg(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+/* ── MOBILE MENU ── */
+function openMobileMenu() { document.getElementById("mobileMenu").classList.add("open"); }
+function closeMobileMenu() { document.getElementById("mobileMenu").classList.remove("open"); }
+
+/* ── REGISTER ── */
+function handleRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById("reg-name").value.trim();
+  const email = document.getElementById("reg-email").value.trim();
+  if (!name || !email) { showToast("Please fill in username and email."); return; }
+  closeModal("registerModal");
+  showToast("Welcome to Free Fire, " + name + "! Check your email.");
+  document.getElementById("reg-name").value = "";
+  document.getElementById("reg-email").value = "";
+}
+
+/* ── DOWNLOAD ── */
+function doDownload(platform) {
+  closeModal("downloadModal");
+  showToast("Downloading Free Fire for " + platform + "…");
+}
+
+/* ── CHARACTERS ── */
+function renderChars() {
+  const tabs = document.getElementById("charTabs");
+  const panel = document.getElementById("charPanel");
+  tabs.innerHTML = CHARS.map((c, i) => `
+    <button class="tab-btn" onclick="setChar(${i})"
+      style="border-color:${i===activeChar?c.color:'var(--border)'};background:${i===activeChar?c.color+'18':'transparent'};color:${i===activeChar?c.color:'var(--muted-fg)'}"
+    >${c.name.toUpperCase()}</button>
+  `).join("");
+  const c = CHARS[activeChar];
+  panel.innerHTML = `
+    <div class="char-img-panel">
+      <img src="${c.img}" alt="${c.name}" />
+      <div class="char-img-overlay" style="background:linear-gradient(135deg,${c.color}22 0%,rgba(6,8,14,.8) 100%)"></div>
+      <div class="char-img-info">
+        <div class="char-rarity" style="color:${c.color}">${c.rarity.toUpperCase()} · ${c.role.toUpperCase()}</div>
+        <div class="char-name">${c.name}</div>
+      </div>
+    </div>
+    <div class="char-detail">
+      <div class="char-ability-label" style="color:${c.color}">ABILITY: ${c.ability.toUpperCase()}</div>
+      <p class="char-desc">${c.desc}</p>
+      <div class="stats-label">// BASE STATS</div>
+      ${Object.entries(c.stats).map(([k,v]) => `
+        <div class="stat-row">
+          <div class="stat-row-header">
+            <span class="stat-name">${k}</span>
+            <span class="stat-val" style="color:${c.color}">${v}</span>
+          </div>
+          <div class="stat-track"><div class="stat-fill" style="width:${v}%;background:${c.color}"></div></div>
+        </div>
+      `).join("")}
+      <button class="select-btn" style="background:${c.color};color:${c.color==='#ffd600'?'#06080e':'#fff'}"
+        onclick="showToast('${c.name} selected as your character!')">
+        SELECT ${c.name.toUpperCase()}
+      </button>
+    </div>
+  `;
+}
+function setChar(i) { activeChar = i; renderChars(); }
+
+/* ── WEAPONS ── */
+function renderWeapons() {
+  document.getElementById("weaponsGrid").innerHTML = WEAPONS.map(w => `
+    <div class="weapon-card" style="cursor:pointer" onclick="showToast('${w.name} equipped!')"
+      onmouseenter="this.style.borderTopColor='${w.color}'" onmouseleave="this.style.borderTopColor='transparent'">
+      <div class="weapon-head">
+        <div>
+          <div class="weapon-type">${w.type.toUpperCase()}</div>
+          <div class="weapon-name">${w.name}</div>
+        </div>
+        <span class="weapon-tag" style="background:${w.color}22;color:${w.color};border:1px solid ${w.color}44">${w.tag}</span>
+      </div>
+      <div class="weapon-bars">
+        ${[["DMG",w.damage],["RANGE",w.range],["FIRE RATE",w.firerate]].map(([l,v])=>`
+          <div class="wbar-row">
+            <div class="wbar-header"><span class="wbar-label">${l}</span><span class="wbar-val" style="color:${w.color}">${v}</span></div>
+            <div class="wbar-track"><div class="wbar-fill" style="width:${v}%;background:${w.color}"></div></div>
+          </div>
+        `).join("")}
+      </div>
+      <div class="weapon-footer">
+        <span class="weapon-mag">MAG: ${w.mag}</span>
+        <span class="weapon-equip" style="color:${w.color}">EQUIP →</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ── MODES ── */
+function renderModes() {
+  const tabs = document.getElementById("modeTabs");
+  const panel = document.getElementById("modePanel");
+  tabs.innerHTML = MODES.map((m,i) => `
+    <button class="tab-btn" onclick="setMode(${i})"
+      style="border-color:${i===activeMode?m.color:'var(--border)'};background:${i===activeMode?m.color+'18':'transparent'};color:${i===activeMode?m.color:'var(--muted-fg)'}"
+    >${m.name.toUpperCase()}</button>
+  `).join("");
+  const m = MODES[activeMode];
+  panel.innerHTML = `
+    <div class="mode-panel">
+      <div class="mode-meta" style="color:${m.color}">
+        <span>👥 ${m.players}</span><span>⏱ ${m.duration}</span>
+      </div>
+      <h3 class="mode-h3">${m.name}</h3>
+      <p class="mode-desc">${m.desc}</p>
+      <div class="mode-map-label">// MAP</div>
+      <div class="mode-map" style="color:${m.color}">${m.map}</div>
+      <button class="mode-play-btn" style="background:${m.color};color:${m.color==='#ffd600'?'#06080e':'#fff'}"
+        onclick="openModal('registerModal')">PLAY THIS MODE</button>
+    </div>
+    <div class="mode-panel">
+      <div class="tips-label">// PRO TIPS</div>
+      ${m.tips.map((t,i)=>`
+        <div class="tip-item" style="border-left-color:${m.color}">
+          <span class="tip-num" style="color:${m.color}">0${i+1}</span>
+          <p class="tip-text">${t}</p>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+function setMode(i) { activeMode = i; renderModes(); }
+
+/* ── LEADERBOARD ── */
+const REGIONS = ["ALL","SEA","IND","EU","NA","SA","CIS"];
+const RANK_ICONS = ["🥇","🥈","🥉"];
+
+function renderLeaderboard() {
+  document.getElementById("lbFilters").innerHTML = REGIONS.map(r => `
+    <button class="lb-filter ${r===activeRegion?'active':''}" onclick="setRegion('${r}')">${r}</button>
+  `).join("");
+  const rows = activeRegion === "ALL" ? LEADERBOARD : LEADERBOARD.filter(p => p.region === activeRegion);
+  document.getElementById("lbRows").innerHTML = rows.length === 0
+    ? `<div style="padding:3rem;text-align:center;color:var(--muted-fg);font-family:var(--ff-m);font-size:.8rem">No players for this region.</div>`
+    : rows.map(p => {
+        const badgeClass = p.badge === "Heroic" ? "badge-heroic" : p.badge === "Diamond" ? "badge-diamond" : "badge-plat";
+        const rankDisplay = p.rank <= 3 ? RANK_ICONS[p.rank-1] : `#${p.rank}`;
+        const rankColor = p.rank===1?"#ffd600":p.rank===2?"#c0c0c0":p.rank===3?"#cd7f32":"var(--muted-fg)";
+        return `
+          <div class="lb-row">
+            <span class="lb-rank" style="color:${rankColor}">${rankDisplay}</span>
+            <span class="lb-name">${p.name}</span>
+            <span class="lb-region lb-col-region">${p.region}</span>
+            <span class="lb-num">${p.kills.toLocaleString()}</span>
+            <span class="lb-num lb-col-wins lb-wins">${p.wins}</span>
+            <span class="lb-kd lb-col-kd">${p.kd}</span>
+            <span class="lb-badge lb-col-badge ${badgeClass}">${p.badge}</span>
+          </div>`;
+      }).join("");
+}
+function setRegion(r) { activeRegion = r; renderLeaderboard(); }
+
+/* ── NEWS ── */
+function renderNews() {
+  document.getElementById("newsGrid").innerHTML = NEWS.map(n => `
+    <article class="news-card" onclick="showToast('Opening: ${n.title.substring(0,40)}…')">
+      <div class="news-img"><img src="${n.img}" alt="${n.title}" loading="lazy" /></div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-tag">${n.tag}</span>
+          <span class="news-date">${n.date}</span>
+        </div>
+        <h3 class="news-title">${n.title}</h3>
+        <div class="news-link">READ MORE →</div>
+      </div>
+    </article>
+  `).join("");
+}
+
+/* ── INIT ── */
+renderChars();
+renderWeapons();
+renderModes();
+renderLeaderboard();
+renderNews();
+</script>
+</body>
+</html>
